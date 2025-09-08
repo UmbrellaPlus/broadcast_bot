@@ -1,4 +1,6 @@
 const { Bot, session, Keyboard } = require("grammy");
+const { savePatient, exportPatientsByCity } = require('./db');
+
 
 const bot = new Bot("8302129711:AAHdhGXk8dMwswjZ6M6VCIVHhIu1ZegO2zM");
 
@@ -18,7 +20,8 @@ const cityKeyboard = new Keyboard()
 // Кнопки выбора действия
 const actionKeyboard = new Keyboard()
     .text("➕ Добавить пациента").row()
-    .text("📢 Сделать рассылку")
+    .text("📢 Сделать рассылку").row()
+    .text("📊 Экспортировать пациентов")
     .resized();
 
 bot.command("start", async (ctx) => {
@@ -48,7 +51,9 @@ bot.on("message:text", async (ctx) => {
         } else if (text === "📢 Сделать рассылку") {
             ctx.session.step = "done";
             return ctx.reply("Рассылка пока не реализована.");
-        } else {
+        } else if (text == "📊 Экспортировать пациентов") {
+            await exportPatientsByCity(ctx.session.data.city)
+        }else {
             return ctx.reply("Выберите действие из меню.");
         }
     }
@@ -93,6 +98,15 @@ bot.on("message:text", async (ctx) => {
 Телефон: ${phone}
 День рождения: ${birthday || "Не указано"}
 Доктор: ${doctor}`;
+
+        await savePatient({
+            city: city,
+            address: address,
+            name: name || "Не указано",
+            phone: phone,
+            birthday: birthday,
+            doctor: doctor
+        })
 
         await ctx.reply(result);
 
