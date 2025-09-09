@@ -1,7 +1,8 @@
 const { Bot, session, Keyboard } = require("grammy");
 const { savePatient, exportPatientsByCity } = require('./db');
 const parseBirthday = require('./birthday');
-const sendSMS = require('./broadcast');
+const sendMessages = require('./utils');
+
 
 
 const bot = new Bot("8302129711:AAHdhGXk8dMwswjZ6M6VCIVHhIu1ZegO2zM");
@@ -51,6 +52,7 @@ bot.on("message:text", async (ctx) => {
             ctx.session.step = "address";
             return ctx.reply("Введите адрес пациента:");
         } else if (text === "📢 Сделать рассылку") {
+            await sendMessages(ctx.session.data.city)
             ctx.session.step = "done";
             return ctx.reply("Рассылка пока не реализована.");
         } else if (text == "📊 Экспортировать пациентов") {
