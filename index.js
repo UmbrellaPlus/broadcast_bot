@@ -1,5 +1,7 @@
 const { Bot, session, Keyboard } = require("grammy");
 const { savePatient, exportPatientsByCity } = require('./db');
+const parseBirthday = require('./birthday');
+const sendSMS = require('./broadcast');
 
 
 const bot = new Bot("8302129711:AAHdhGXk8dMwswjZ6M6VCIVHhIu1ZegO2zM");
@@ -52,7 +54,7 @@ bot.on("message:text", async (ctx) => {
             ctx.session.step = "done";
             return ctx.reply("Рассылка пока не реализована.");
         } else if (text == "📊 Экспортировать пациентов") {
-            await exportPatientsByCity(ctx.session.data.city)
+            await exportPatientsByCity(ctx,ctx.session.data.city)
         }else {
             return ctx.reply("Выберите действие из меню.");
         }
@@ -72,7 +74,7 @@ bot.on("message:text", async (ctx) => {
 
     if (step === "phone") {
         const phone = text.trim();
-        if (!/^\d{10,15}$/.test(phone)) {
+        if (!/^380\d{9}$/.test(phone)) {
             return ctx.reply("Введите корректный номер телефона (только цифры).");
         }
         ctx.session.data.phone = phone;
@@ -80,10 +82,15 @@ bot.on("message:text", async (ctx) => {
         return ctx.reply("Введите день рождения (или напишите «Пропустить»):");
     }
 
+    const birthday = parseBirthday(text)
     if (step === "birthday") {
-        ctx.session.data.birthday = text.toLowerCase() !== "пропустить" ? text : null;
-        ctx.session.step = "doctor";
-        return ctx.reply("Введите имя доктора:");
+        if (!birthday && text.toLowerCase() !== "пропустить") {
+            return ctx.reply("Дата указана неверно. Введите в формате ДД.ММ.ГГГГ, например: 25.12.1990");
+        }
+
+        ctx.session.data.birthday = birthday;
+        ctx.session.step = "doctor"
+        return ctx.reply("Введите имя доктора")
     }
 
     if (step === "doctor") {
