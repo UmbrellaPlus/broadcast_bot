@@ -8,4 +8,21 @@ async function sendMessages(city) {
     }
 }
 
+async function sendBirthdayMessages(city) {
+    const patients = await getPatientsByCity(city);
+    const today = new Date();
+    const todayDay = today.getDate();
+    const todayMonth = today.getMonth(); // январь = 0
+
+    for (const patient of patients) {
+        if (patient.birthday) {
+            const birthday = new Date(patient.birthday);
+            if (birthday.getDate() === todayDay && birthday.getMonth() === todayMonth) {
+                await sendSMS(patient.phone, `Поздравляем с днём рождения! 🎉`);
+            }
+        }
+    }
+}
+
+
 module.exports = sendMessages
