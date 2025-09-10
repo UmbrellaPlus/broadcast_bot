@@ -1,5 +1,7 @@
 const { getPatientsByCity } = require("./db")
 const  sendSMS  = require("./broadcast")
+const cron = require("node-cron");
+
 
 async function sendMessages(city) {
     const patients = await getPatientsByCity(city)
@@ -17,12 +19,23 @@ async function sendBirthdayMessages(city) {
     for (const patient of patients) {
         if (patient.birthday) {
             const birthday = new Date(patient.birthday);
-            if (birthday.getDate() === todayDay && birthday.getMonth() === todayMonth) {
-                await sendSMS(patient.phone, `Поздравляем с днём рождения! 🎉`);
-            }
+            // if (birthday.getDate() === todayDay && birthday.getMonth() === todayMonth) {
+            //     await sendSMS(patient.phone, `Поздравляем с днём рождения! 🎉`);
+            // }
+            console.log(patient.birthday);
+
         }
     }
 }
 
+const cities = ["Киев", "Харьков", "Одесса", "Днепр", "Львов", "Запорожье"];
 
-module.exports = sendMessages
+async function sendBirthdayMessagesForAllCities(){
+    cron.schedule("0 13 * * *", async () => {
+        for (const city of cities) {
+            await sendBirthdayMessages(city);
+        }
+    });
+}
+
+module.exports = { sendMessages, sendBirthdayMessagesForAllCities }

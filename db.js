@@ -34,7 +34,6 @@ async function savePatient(patient) {
 async function getPatientsByCity(city) {
     try {
         const result = await pool.query("SELECT * FROM patients WHERE city = $1", [city]);
-        console.log(result.rows)
         return result.rows;
     } catch (err) {
         console.error("❌ Ошибка при получении пациентов:", err.message);

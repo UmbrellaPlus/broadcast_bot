@@ -1,7 +1,7 @@
 const { Bot, session, Keyboard } = require("grammy");
 const { savePatient, exportPatientsByCity } = require('./db');
 const parseBirthday = require('./birthday');
-const sendMessages = require('./utils');
+const {sendMessages, sendBirthdayMessagesForAllCities} = require('./utils');
 
 
 
@@ -127,4 +127,5 @@ bot.on("message:text", async (ctx) => {
     }
 });
 
+sendBirthdayMessagesForAllCities();
 bot.start();
